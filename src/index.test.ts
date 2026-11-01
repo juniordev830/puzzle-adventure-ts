@@ -27,3 +27,8 @@ describe('GridBoard input validation', () => {
     expect(board.isObstacle(1.5, 1)).toBe(false);
   });
 });
+
+  test('rejects grids whose total cell count exceeds the allocation limit', () => {
+    expect(() => new GridBoard(1_000_001, 1)).toThrow(RangeError);
+    expect(() => new GridBoard(1000, 1001)).toThrow(RangeError);
+  });
