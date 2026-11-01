@@ -1,3 +1,5 @@
+const MAX_GRID_CELLS = 1_000_000;
+
 export interface Point {
   x: number;
   y: number;
@@ -14,6 +16,9 @@ export class GridBoard {
     }
     if (!Number.isSafeInteger(height) || height <= 0) {
       throw new RangeError('Grid height must be a positive safe integer.');
+    }
+    if (width > Math.floor(MAX_GRID_CELLS / height)) {
+      throw new RangeError(`Grid dimensions cannot exceed ${MAX_GRID_CELLS.toLocaleString()} total cells.`);
     }
     this.width = width;
     this.height = height;
