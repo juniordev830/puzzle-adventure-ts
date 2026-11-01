@@ -9,6 +9,12 @@ export class GridBoard {
   private grid: number[][];
 
   constructor(width: number, height: number) {
+    if (!Number.isSafeInteger(width) || width <= 0) {
+      throw new RangeError('Grid width must be a positive safe integer.');
+    }
+    if (!Number.isSafeInteger(height) || height <= 0) {
+      throw new RangeError('Grid height must be a positive safe integer.');
+    }
     this.width = width;
     this.height = height;
     this.grid = Array.from({ length: height }, () => Array(width).fill(0));
@@ -25,7 +31,8 @@ export class GridBoard {
   }
 
   public isValid(x: number, y: number): boolean {
-    return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    return Number.isSafeInteger(x) && Number.isSafeInteger(y)
+      && x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 }
 
