@@ -6,9 +6,17 @@ export interface Point {
 }
 
 export class GridBoard {
-  public width: number;
-  public height: number;
+  private readonly _width: number;
+  private readonly _height: number;
   private grid: number[][];
+
+  public get width(): number {
+    return this._width;
+  }
+
+  public get height(): number {
+    return this._height;
+  }
 
   constructor(width: number, height: number) {
     if (!Number.isSafeInteger(width) || width <= 0) {
@@ -20,8 +28,8 @@ export class GridBoard {
     if (width > Math.floor(MAX_GRID_CELLS / height)) {
       throw new RangeError(`Grid dimensions cannot exceed ${MAX_GRID_CELLS.toLocaleString()} total cells.`);
     }
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
     this.grid = Array.from({ length: height }, () => Array(width).fill(0));
   }
 
