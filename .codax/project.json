@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "project_kind": "Motor de puzzle em TypeScript",
+  "entry_points": [
+    "src/index.ts",
+    "src/index.test.ts"
+  ],
+  "test_commands": [
+    "npm run build",
+    "npm test"
+  ],
+  "review_focus": [
+    "Validação de coordenadas e limites do grid",
+    "Caminhos inválidos e obstáculos"
+  ]
+}
