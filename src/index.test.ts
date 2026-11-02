@@ -32,3 +32,22 @@ describe('GridBoard input validation', () => {
     expect(() => new GridBoard(1_000_001, 1)).toThrow(RangeError);
     expect(() => new GridBoard(1000, 1001)).toThrow(RangeError);
   });
+
+
+describe('GridBoard dimension immutability', () => {
+  test('does not allow callers to mutate dimensions after allocation', () => {
+    const board = new GridBoard(3, 2);
+
+    expect(() => {
+      (board as any).width = 100;
+    }).toThrow(TypeError);
+    expect(() => {
+      (board as any).height = 100;
+    }).toThrow(TypeError);
+
+    expect(board.width).toBe(3);
+    expect(board.height).toBe(2);
+    expect(board.isValid(2, 1)).toBe(true);
+    expect(board.isValid(3, 1)).toBe(false);
+  });
+});
