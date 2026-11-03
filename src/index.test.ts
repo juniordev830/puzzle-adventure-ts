@@ -34,6 +34,24 @@ describe('GridBoard input validation', () => {
   });
 
 
+describe('GridBoard pathfinding', () => {
+  test('finds a shortest path without crossing obstacles', () => {
+    const board = new GridBoard(3, 3);
+    board.setObstacle(1, 1);
+    const path = board.findPath({ x: 0, y: 0 }, { x: 2, y: 2 });
+
+    expect(path).not.toBeNull();
+    expect(path).toHaveLength(5);
+    expect(path?.some(point => point.x === 1 && point.y === 1)).toBe(false);
+  });
+
+  test('returns null when start or goal is blocked', () => {
+    const board = new GridBoard(2, 2);
+    board.setObstacle(0, 0);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 1, y: 1 })).toBeNull();
+  });
+});
+
 describe('GridBoard dimension immutability', () => {
   test('does not allow callers to mutate dimensions after allocation', () => {
     const board = new GridBoard(3, 2);
