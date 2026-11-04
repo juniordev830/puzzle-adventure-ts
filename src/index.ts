@@ -39,6 +39,49 @@ export class GridBoard {
     }
   }
 
+  /** Removes a wall so the same board can be edited between puzzle attempts. */
+  public clearObstacle(x: number, y: number): void {
+    if (!this.isValid(x, y)) {
+      throw new RangeError('Obstacle position must be inside the board.');
+    }
+    this.grid[y][x] = 0;
+  }
+
+  /**
+   * Renders a compact text map and overlays the shortest route, if reachable.
+   * S = start, G = goal, B = both, # = wall, * = route, . = free.
+   * Restricted to 10,000 cells to avoid accidentally dumping enormous maps.
+   */
+  public renderAscii(start: Point, goal: Point): string {
+    if (this.width * this.height > 10_000) {
+      throw new RangeError('ASCII map must have at most 10,000 cells.');
+    }
+    if (!start || !goal || !this.isValid(start.x, start.y) ||
+        !this.isValid(goal.x, goal.y) ||
+        this.isObstacle(start.x, start.y) || this.isObstacle(goal.x, goal.y)) {
+      throw new RangeError('Start and goal must be valid unblocked cells.');
+    }
+
+    const route = this.findPath(start, goal);
+    const marks = new Set((route ?? []).map(point => `${point.x},${point.y}`));
+    const lines: string[] = [];
+    for (let y = 0; y < this.height; y += 1) {
+      let row = '';
+      for (let x = 0; x < this.width; x += 1) {
+        const isStart = x === start.x && y === start.y;
+        const isGoal = x === goal.x && y === goal.y;
+        if (isStart && isGoal) row += 'B';
+        else if (isStart) row += 'S';
+        else if (isGoal) row += 'G';
+        else if (this.isObstacle(x, y)) row += '#';
+        else if (marks.has(`${x},${y}`)) row += '*';
+        else row += '.';
+      }
+      lines.push(row);
+    }
+    return lines.join('\n');
+  }
+
   public isObstacle(x: number, y: number): boolean {
     return this.isValid(x, y) && this.grid[y][x] === 1;
   }
@@ -92,6 +135,7 @@ export function main(): void {
   const board = new GridBoard(5, 5);
   board.setObstacle(2, 2);
   console.log('🧩 Puzzle Board setup complete. Obstacle at (2,2):', board.isObstacle(2, 2));
+  console.log(board.renderAscii({ x: 0, y: 0 }, { x: 4, y: 4 }));
 }
 
 if (require.main === module) {
