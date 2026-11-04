@@ -1,61 +1,48 @@
 # Puzzle Adventure TypeScript
 
-Projeto de estudo de lógica para puzzles em grade, algoritmos de caminho e validação de mapas usando TypeScript. O estado atual é uma biblioteca de lógica e não um jogo visual completo para navegador.
+Projeto de estudo de lógica para puzzles em grade, busca de caminhos e representação de labirintos em **TypeScript**. É uma biblioteca de lógica com um **mapa textual no terminal**, ainda não um jogo visual completo no navegador.
 
-## Tecnologias
+## Funcionalidades
 
-- TypeScript
-- Jest
-- Node.js e npm
-- GitHub Actions para build e testes automatizados
+- `new GridBoard(largura, altura)`: cria grade de até 1.000.000 de células, validando dimensões.
+- `setObstacle(x, y)` e `clearObstacle(x, y)`: posiciona e remove paredes da grade.
+- `findPath(inicio, destino)`: encontra um caminho mais curto em quatro direções por busca em largura (BFS), ou `null` se não houver caminho.
+- `renderAscii(inicio, destino)`: produz uma visualização de até **10.000 células** no formato de texto. Identifica obstáculos, início, destino e caminho mais curto calculado.
 
-## Requisitos
+## Visualização em texto
 
-- Node.js e npm
-- Dependências instaladas com npm
+Símbolos: `S` (início), `G` (destino), `B` (início e destino iguais), `#` (parede), `*` (caminho) e `.` (célula livre).
 
-## Instalação
+```ts
+import { GridBoard } from './src/index';
+
+const board = new GridBoard(3, 3);
+board.setObstacle(1, 1);
+console.log(board.renderAscii({ x: 0, y: 0 }, { x: 2, y: 2 }));
+```
+
+Saída:
+
+```text
+S**
+.#*
+..G
+```
+
+Quando o destino está inacessível, o mapa ainda mostra `S`, `G` e os obstáculos, mas não desenha um caminho inexistente. Células fora da grade, início/destino bloqueados ou mapas de texto maiores que 10.000 células geram `RangeError`.
+
+## Instalação e testes
 
 ```bash
 npm ci
-```
-
-## Comandos
-
-```bash
-# Executar testes
 npm test
-
-# Compilar TypeScript
 npm run build
 ```
 
-## Estrutura
+O GitHub Actions testa algoritmo BFS, limites da grade, mapas sem saída, desenho, limpeza de obstáculos e erros de entrada.
 
-```text
-.
-├── src/
-│   ├── index.ts
-│   └── index.test.ts
-├── jest.config.js
-├── package.json
-├── package-lock.json
-├── tsconfig.json
-└── README.md
-```
+## Limites e próximos passos
 
-## Áreas de estudo
-
-- Representação de grade e células.
-- Busca de caminhos e validação de conectividade.
-- Testes automatizados para casos válidos e inválidos.
-
-Consulte os módulos em `src/index.ts` para identificar as funções e os tipos exportados atualmente.
-
-## Próximas melhorias
-
-- Documentar a API pública de cada módulo com exemplos de entrada e saída.
-- Adicionar cenários de teste para mapas maiores e casos-limite.
-- Evoluir a lógica para uma interface visual somente quando essa camada for implementada.
+Não há motor gráfico, animação, movimentação em tempo real, controle de teclado, armazenamento ou interface de navegador. O recurso atual é um **renderizador de caracteres**, útil para depurar labirintos e demonstrar algoritmos de grafos; o objetivo seguinte é uma interface web interativa.
 
 Projeto de portfólio em desenvolvimento.
