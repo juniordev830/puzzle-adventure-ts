@@ -69,3 +69,46 @@ describe('GridBoard dimension immutability', () => {
     expect(board.isValid(3, 1)).toBe(false);
   });
 });
+
+describe('GridBoard ASCII map and obstacle editing', () => {
+  test('shows a deterministic shortest path without changing obstacles', () => {
+    const board = new GridBoard(3, 3);
+    board.setObstacle(1, 1);
+
+    expect(board.renderAscii({ x: 0, y: 0 }, { x: 2, y: 2 }))
+      .toBe('S**\n.#*\n..G');
+    expect(board.isObstacle(1, 1)).toBe(true);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 2 })).toHaveLength(5);
+  });
+
+  test('shows start and goal even when no route exists', () => {
+    const board = new GridBoard(3, 3);
+    for (let y = 0; y < 3; y += 1) board.setObstacle(1, y);
+    expect(board.renderAscii({ x: 0, y: 1 }, { x: 2, y: 1 }))
+      .toBe('.#.\nS#G\n.#.');
+  });
+
+  test('clears obstacles to reopen paths and preserves the same-cell case', () => {
+    const board = new GridBoard(3, 1);
+    board.setObstacle(1, 0);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 })).toBeNull();
+    board.clearObstacle(1, 0);
+    expect(board.renderAscii({ x: 0, y: 0 }, { x: 2, y: 0 }))
+      .toBe('S*G');
+    expect(board.renderAscii({ x: 0, y: 0 }, { x: 0, y: 0 }))
+      .toBe('B..');
+  });
+
+  test('rejects blocked, invalid or excessively large text maps', () => {
+    const board = new GridBoard(3, 3);
+    board.setObstacle(0, 0);
+    expect(() => board.renderAscii({ x: 0, y: 0 }, { x: 2, y: 2 }))
+      .toThrow(RangeError);
+    expect(() => board.renderAscii({ x: -1, y: 0 }, { x: 2, y: 2 }))
+      .toThrow(RangeError);
+    expect(() => board.clearObstacle(4, 4)).toThrow(RangeError);
+    const large = new GridBoard(101, 100);
+    expect(() => large.renderAscii({ x: 0, y: 0 }, { x: 100, y: 99 }))
+      .toThrow(RangeError);
+  });
+});
