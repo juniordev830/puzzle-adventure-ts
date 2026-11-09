@@ -59,3 +59,7 @@ Consulte os módulos em `src/index.ts` para identificar as funções e os tipos 
 - Evoluir a lógica para uma interface visual somente quando essa camada for implementada.
 
 Projeto de portfólio em desenvolvimento.
+
+## Edição e análise de mapas
+
+O `GridBoard` agora permite `clearObstacle(x, y)` para remover uma parede e `reachableArea({x, y})` para contar as células livres conectadas a uma posição inicial. Essas operações ajudam a validar níveis e a identificar regiões isoladas antes de publicar um puzzle. Posições inválidas ou bloqueadas retornam 0 em `reachableArea`; limpar uma coordenada inválida não altera o mapa. A busca é iterativa e usa no máximo a quantidade de células do tabuleiro.
