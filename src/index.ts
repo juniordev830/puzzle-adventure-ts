@@ -39,6 +39,13 @@ export class GridBoard {
     }
   }
 
+  /** Remove an existing wall to let editors revise their maps. Invalid cells are ignored. */
+  public clearObstacle(x: number, y: number): void {
+    if (this.isValid(x, y)) {
+      this.grid[y][x] = 0;
+    }
+  }
+
   public isObstacle(x: number, y: number): boolean {
     return this.isValid(x, y) && this.grid[y][x] === 1;
   }
@@ -46,6 +53,33 @@ export class GridBoard {
   public isValid(x: number, y: number): boolean {
     return Number.isSafeInteger(x) && Number.isSafeInteger(y)
       && x >= 0 && x < this.width && y >= 0 && y < this.height;
+  }
+
+  /**
+   * Count all walkable cells connected to a start position.
+   * Uses an iterative breadth-first search to avoid recursion limits on large grids.
+   */
+  public reachableArea(start: Point): number {
+    if (!this.isValid(start.x, start.y) || this.isObstacle(start.x, start.y)) return 0;
+    const queue: Point[] = [{ x: start.x, y: start.y }];
+    const seen = new Set<number>([start.y * this.width + start.x]);
+    const directions: Point[] = [
+      { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
+    ];
+    for (let index = 0; index < queue.length; index += 1) {
+      const point = queue[index];
+      for (const move of directions) {
+        const nextX = point.x + move.x;
+        const nextY = point.y + move.y;
+        if (!this.isValid(nextX, nextY) || this.isObstacle(nextX, nextY)) continue;
+        const key = nextY * this.width + nextX;
+        if (!seen.has(key)) {
+          seen.add(key);
+          queue.push({ x: nextX, y: nextY });
+        }
+      }
+    }
+    return seen.size;
   }
 
   /** Returns the shortest four-directional path, or null when no route exists. */
