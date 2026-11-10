@@ -69,3 +69,32 @@ describe('GridBoard dimension immutability', () => {
     expect(board.isValid(3, 1)).toBe(false);
   });
 });
+
+describe('Editable maps and reachability', () => {
+  test('recomputes connected area after removing a wall', () => {
+    const board = new GridBoard(3, 3);
+    board.setObstacle(1, 0);
+    board.setObstacle(1, 1);
+    board.setObstacle(1, 2);
+    expect(board.reachableArea({ x: 0, y: 0 })).toBe(3);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 })).toBeNull();
+    board.clearObstacle(1, 1);
+    expect(board.reachableArea({ x: 0, y: 0 })).toBe(7);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 })).not.toBeNull();
+  });
+
+  test('returns zero for blocked or invalid start', () => {
+    const board = new GridBoard(2, 2);
+    board.setObstacle(0, 0);
+    expect(board.reachableArea({ x: 0, y: 0 })).toBe(0);
+    expect(board.reachableArea({ x: -1, y: 0 })).toBe(0);
+    expect(board.reachableArea({ x: 0.5, y: 0 })).toBe(0);
+    board.clearObstacle(-1, 0);
+    expect(board.isObstacle(0, 0)).toBe(true);
+  });
+
+  test('handles long corridors without recursive stack overflow', () => {
+    const board = new GridBoard(1, 5000);
+    expect(board.reachableArea({ x: 0, y: 0 })).toBe(5000);
+  });
+});
