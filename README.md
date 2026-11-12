@@ -63,3 +63,7 @@ Projeto de portfólio em desenvolvimento.
 ## Edição e análise de mapas
 
 O `GridBoard` agora permite `clearObstacle(x, y)` para remover uma parede e `reachableArea({x, y})` para contar as células livres conectadas a uma posição inicial. Essas operações ajudam a validar níveis e a identificar regiões isoladas antes de publicar um puzzle. Posições inválidas ou bloqueadas retornam 0 em `reachableArea`; limpar uma coordenada inválida não altera o mapa. A busca é iterativa e usa no máximo a quantidade de células do tabuleiro.
+
+## Validação e manutenção
+
+Consulte o [guia técnico de validação](docs/GUIA_DE_VALIDACAO.md) antes de alterar o código: ele reúne os comandos, casos de regressão e limites atuais do projeto.
