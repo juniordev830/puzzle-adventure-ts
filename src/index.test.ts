@@ -98,3 +98,25 @@ describe('Editable maps and reachability', () => {
     expect(board.reachableArea({ x: 0, y: 0 })).toBe(5000);
   });
 });
+
+describe('GridBoard paths on wide and tall maps', () => {
+  test('does not treat cells across a row boundary as neighbors', () => {
+    const board = new GridBoard(2, 2);
+    board.setObstacle(0, 0);
+    board.setObstacle(1, 1);
+    expect(board.findPath({ x: 1, y: 0 }, { x: 0, y: 1 })).toBeNull();
+  });
+
+  test('returns a single point when the start is the goal', () => {
+    const board = new GridBoard(1, 1);
+    expect(board.findPath({ x: 0, y: 0 }, { x: 0, y: 0 })).toEqual([{ x: 0, y: 0 }]);
+  });
+
+  test('finds an ordered path in a tall corridor', () => {
+    const board = new GridBoard(1, 50_000);
+    const path = board.findPath({ x: 0, y: 49_999 }, { x: 0, y: 0 });
+    expect(path).toHaveLength(50_000);
+    expect(path?.[0]).toEqual({ x: 0, y: 49_999 });
+    expect(path?.[49_999]).toEqual({ x: 0, y: 0 });
+  });
+});

@@ -8,7 +8,7 @@ export interface Point {
 export class GridBoard {
   private readonly _width: number;
   private readonly _height: number;
-  private grid: number[][];
+  private readonly grid: Uint8Array;
 
   public get width(): number {
     return this._width;
@@ -30,24 +30,24 @@ export class GridBoard {
     }
     this._width = width;
     this._height = height;
-    this.grid = Array.from({ length: height }, () => Array(width).fill(0));
+    this.grid = new Uint8Array(width * height);
   }
 
   public setObstacle(x: number, y: number): void {
     if (this.isValid(x, y)) {
-      this.grid[y][x] = 1;
+      this.grid[y * this.width + x] = 1;
     }
   }
 
   /** Remove an existing wall to let editors revise their maps. Invalid cells are ignored. */
   public clearObstacle(x: number, y: number): void {
     if (this.isValid(x, y)) {
-      this.grid[y][x] = 0;
+      this.grid[y * this.width + x] = 0;
     }
   }
 
   public isObstacle(x: number, y: number): boolean {
-    return this.isValid(x, y) && this.grid[y][x] === 1;
+    return this.isValid(x, y) && this.grid[y * this.width + x] === 1;
   }
 
   public isValid(x: number, y: number): boolean {
@@ -89,34 +89,45 @@ export class GridBoard {
       return null;
     }
 
-    const key = (point: Point): string => `${point.x},${point.y}`;
-    const queue: Point[] = [{ x: start.x, y: start.y }];
-    const previous = new Map<string, Point | null>([[key(queue[0]), null]]);
+    const startIndex = start.y * this.width + start.x;
+    const goalIndex = goal.y * this.width + goal.x;
+    if (startIndex === goalIndex) return [{ x: start.x, y: start.y }];
+
+    const previous = new Int32Array(this.grid.length).fill(-1);
+    const queue = new Int32Array(this.grid.length);
+    previous[startIndex] = startIndex;
+    queue[0] = startIndex;
+    let size = 1;
     const directions: Point[] = [
       { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
     ];
 
-    for (let index = 0; index < queue.length; index += 1) {
+    for (let index = 0; index < size; index += 1) {
       const current = queue[index];
-      if (current.x === goal.x && current.y === goal.y) break;
+      if (current === goalIndex) break;
+      const x = current % this.width;
+      const y = Math.floor(current / this.width);
+
       for (const direction of directions) {
-        const next = { x: current.x + direction.x, y: current.y + direction.y };
-        const nextKey = key(next);
-        if (this.isValid(next.x, next.y) && !this.isObstacle(next.x, next.y)
-          && !previous.has(nextKey)) {
-          previous.set(nextKey, current);
-          queue.push(next);
+        const nextX = x + direction.x;
+        const nextY = y + direction.y;
+        if (!this.isValid(nextX, nextY)) continue;
+
+        const next = nextY * this.width + nextX;
+        if (this.grid[next] === 0 && previous[next] === -1) {
+          previous[next] = current;
+          queue[size] = next;
+          size += 1;
         }
       }
     }
 
-    const goalKey = key(goal);
-    if (!previous.has(goalKey)) return null;
+    if (previous[goalIndex] === -1) return null;
+
     const path: Point[] = [];
-    let cursor: Point | null = { x: goal.x, y: goal.y };
-    while (cursor !== null) {
-      path.push(cursor);
-      cursor = previous.get(key(cursor)) ?? null;
+    for (let cursor = goalIndex; ; cursor = previous[cursor]) {
+      path.push({ x: cursor % this.width, y: Math.floor(cursor / this.width) });
+      if (cursor === startIndex) break;
     }
     return path.reverse();
   }
