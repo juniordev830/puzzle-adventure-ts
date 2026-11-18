@@ -5,7 +5,7 @@ Projeto de estudo de lógica para puzzles em grade, algoritmos de caminho e vali
 ## Tecnologias
 
 - TypeScript
-- Jest
+- Executor de testes nativo do Node.js
 - Node.js e npm
 - GitHub Actions para build e testes automatizados
 
@@ -37,7 +37,6 @@ npm run build
 ├── src/
 │   ├── index.ts
 │   └── index.test.ts
-├── jest.config.js
 ├── package.json
 ├── package-lock.json
 ├── tsconfig.json

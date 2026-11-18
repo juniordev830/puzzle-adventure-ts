@@ -1,36 +1,37 @@
+import assert from 'node:assert/strict';
+import { describe, test } from 'node:test';
 import { GridBoard } from './index';
 
 describe('Puzzle Grid Board Tests', () => {
   test('should create valid grid and register obstacles', () => {
     const board = new GridBoard(10, 10);
-    expect(board.isValid(5, 5)).toBe(true);
-    expect(board.isObstacle(2, 3)).toBe(false);
+    assert.equal(board.isValid(5, 5), true);
+    assert.equal(board.isObstacle(2, 3), false);
 
     board.setObstacle(2, 3);
-    expect(board.isObstacle(2, 3)).toBe(true);
+    assert.equal(board.isObstacle(2, 3), true);
   });
 });
 
 
 describe('GridBoard input validation', () => {
-  test.each([[0, 5], [5, 0], [-1, 5], [5, -1], [1.5, 5], [5, 2.5]])(
-    'rejects invalid dimensions %s x %s',
-    (width, height) => {
-      expect(() => new GridBoard(width, height)).toThrow(RangeError);
-    },
-  );
+  for (const [width, height] of [[0, 5], [5, 0], [-1, 5], [5, -1], [1.5, 5], [5, 2.5]]) {
+    test(`rejects invalid dimensions ${width} x ${height}`, () => {
+      assert.throws(() => new GridBoard(width, height), RangeError);
+    });
+  }
 
   test('rejects fractional coordinates instead of creating non-cell array properties', () => {
     const board = new GridBoard(3, 3);
-    expect(board.isValid(1.5, 1)).toBe(false);
+    assert.equal(board.isValid(1.5, 1), false);
     board.setObstacle(1.5, 1);
-    expect(board.isObstacle(1.5, 1)).toBe(false);
+    assert.equal(board.isObstacle(1.5, 1), false);
   });
 });
 
   test('rejects grids whose total cell count exceeds the allocation limit', () => {
-    expect(() => new GridBoard(1_000_001, 1)).toThrow(RangeError);
-    expect(() => new GridBoard(1000, 1001)).toThrow(RangeError);
+    assert.throws(() => new GridBoard(1_000_001, 1), RangeError);
+    assert.throws(() => new GridBoard(1000, 1001), RangeError);
   });
 
 
@@ -40,15 +41,15 @@ describe('GridBoard pathfinding', () => {
     board.setObstacle(1, 1);
     const path = board.findPath({ x: 0, y: 0 }, { x: 2, y: 2 });
 
-    expect(path).not.toBeNull();
-    expect(path).toHaveLength(5);
-    expect(path?.some(point => point.x === 1 && point.y === 1)).toBe(false);
+    assert.notEqual(path, null);
+    assert.equal((path)?.length, 5);
+    assert.equal(path?.some(point => point.x === 1 && point.y === 1), false);
   });
 
   test('returns null when start or goal is blocked', () => {
     const board = new GridBoard(2, 2);
     board.setObstacle(0, 0);
-    expect(board.findPath({ x: 0, y: 0 }, { x: 1, y: 1 })).toBeNull();
+    assert.equal(board.findPath({ x: 0, y: 0 }, { x: 1, y: 1 }), null);
   });
 });
 
@@ -56,17 +57,17 @@ describe('GridBoard dimension immutability', () => {
   test('does not allow callers to mutate dimensions after allocation', () => {
     const board = new GridBoard(3, 2);
 
-    expect(() => {
+    assert.throws(() => {
       (board as any).width = 100;
-    }).toThrow(TypeError);
-    expect(() => {
+    }, TypeError);
+    assert.throws(() => {
       (board as any).height = 100;
-    }).toThrow(TypeError);
+    }, TypeError);
 
-    expect(board.width).toBe(3);
-    expect(board.height).toBe(2);
-    expect(board.isValid(2, 1)).toBe(true);
-    expect(board.isValid(3, 1)).toBe(false);
+    assert.equal(board.width, 3);
+    assert.equal(board.height, 2);
+    assert.equal(board.isValid(2, 1), true);
+    assert.equal(board.isValid(3, 1), false);
   });
 });
 
@@ -76,26 +77,34 @@ describe('Editable maps and reachability', () => {
     board.setObstacle(1, 0);
     board.setObstacle(1, 1);
     board.setObstacle(1, 2);
-    expect(board.reachableArea({ x: 0, y: 0 })).toBe(3);
-    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 })).toBeNull();
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 3);
+    assert.equal(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 }), null);
     board.clearObstacle(1, 1);
-    expect(board.reachableArea({ x: 0, y: 0 })).toBe(7);
-    expect(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 })).not.toBeNull();
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 7);
+    assert.notEqual(board.findPath({ x: 0, y: 0 }, { x: 2, y: 0 }), null);
   });
 
   test('returns zero for blocked or invalid start', () => {
     const board = new GridBoard(2, 2);
     board.setObstacle(0, 0);
-    expect(board.reachableArea({ x: 0, y: 0 })).toBe(0);
-    expect(board.reachableArea({ x: -1, y: 0 })).toBe(0);
-    expect(board.reachableArea({ x: 0.5, y: 0 })).toBe(0);
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 0);
+    assert.equal(board.reachableArea({ x: -1, y: 0 }), 0);
+    assert.equal(board.reachableArea({ x: 0.5, y: 0 }), 0);
     board.clearObstacle(-1, 0);
-    expect(board.isObstacle(0, 0)).toBe(true);
+    assert.equal(board.isObstacle(0, 0), true);
   });
 
   test('handles long corridors without recursive stack overflow', () => {
     const board = new GridBoard(1, 5000);
-    expect(board.reachableArea({ x: 0, y: 0 })).toBe(5000);
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 5000);
+  });
+
+  test('counts the largest board and preserves distinct regions across a wall', () => {
+    const board = new GridBoard(1000, 1000);
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 1_000_000);
+    for (let y = 0; y < 1000; y++) board.setObstacle(500, y);
+    assert.equal(board.reachableArea({ x: 0, y: 0 }), 500_000);
+    assert.equal(board.reachableArea({ x: 999, y: 999 }), 499_000);
   });
 });
 
@@ -104,19 +113,19 @@ describe('GridBoard paths on wide and tall maps', () => {
     const board = new GridBoard(2, 2);
     board.setObstacle(0, 0);
     board.setObstacle(1, 1);
-    expect(board.findPath({ x: 1, y: 0 }, { x: 0, y: 1 })).toBeNull();
+    assert.equal(board.findPath({ x: 1, y: 0 }, { x: 0, y: 1 }), null);
   });
 
   test('returns a single point when the start is the goal', () => {
     const board = new GridBoard(1, 1);
-    expect(board.findPath({ x: 0, y: 0 }, { x: 0, y: 0 })).toEqual([{ x: 0, y: 0 }]);
+    assert.deepEqual(board.findPath({ x: 0, y: 0 }, { x: 0, y: 0 }), [{ x: 0, y: 0 }]);
   });
 
   test('finds an ordered path in a tall corridor', () => {
     const board = new GridBoard(1, 50_000);
     const path = board.findPath({ x: 0, y: 49_999 }, { x: 0, y: 0 });
-    expect(path).toHaveLength(50_000);
-    expect(path?.[0]).toEqual({ x: 0, y: 49_999 });
-    expect(path?.[49_999]).toEqual({ x: 0, y: 0 });
+    assert.equal((path)?.length, 50_000);
+    assert.deepEqual(path?.[0], { x: 0, y: 49_999 });
+    assert.deepEqual(path?.[49_999], { x: 0, y: 0 });
   });
 });
