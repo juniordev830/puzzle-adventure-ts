@@ -1,4 +1,5 @@
 const MAX_GRID_CELLS = 1_000_000;
+const DIRECTIONS = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 
 export interface Point {
   x: number;
@@ -61,25 +62,27 @@ export class GridBoard {
    */
   public reachableArea(start: Point): number {
     if (!this.isValid(start.x, start.y) || this.isObstacle(start.x, start.y)) return 0;
-    const queue: Point[] = [{ x: start.x, y: start.y }];
-    const seen = new Set<number>([start.y * this.width + start.x]);
-    const directions: Point[] = [
-      { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
-    ];
-    for (let index = 0; index < queue.length; index += 1) {
+    const startIndex = start.y * this.width + start.x;
+    const queue = new Uint32Array(this.grid.length);
+    const seen = new Uint8Array(this.grid.length);
+    queue[0] = startIndex;
+    seen[startIndex] = 1;
+    let size = 1;
+    for (let index = 0; index < size; index += 1) {
       const point = queue[index];
-      for (const move of directions) {
-        const nextX = point.x + move.x;
-        const nextY = point.y + move.y;
-        if (!this.isValid(nextX, nextY) || this.isObstacle(nextX, nextY)) continue;
-        const key = nextY * this.width + nextX;
-        if (!seen.has(key)) {
-          seen.add(key);
-          queue.push({ x: nextX, y: nextY });
-        }
+      const x = point % this.width;
+      const y = Math.floor(point / this.width);
+      for (const move of DIRECTIONS) {
+        const nextX = x + move.x;
+        const nextY = y + move.y;
+        if (!this.isValid(nextX, nextY)) continue;
+        const next = nextY * this.width + nextX;
+        if (seen[next] || this.grid[next]) continue;
+        seen[next] = 1;
+        queue[size++] = next;
       }
     }
-    return seen.size;
+    return size;
   }
 
   /** Returns the shortest four-directional path, or null when no route exists. */
@@ -98,17 +101,13 @@ export class GridBoard {
     previous[startIndex] = startIndex;
     queue[0] = startIndex;
     let size = 1;
-    const directions: Point[] = [
-      { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
-    ];
-
     for (let index = 0; index < size; index += 1) {
       const current = queue[index];
       if (current === goalIndex) break;
       const x = current % this.width;
       const y = Math.floor(current / this.width);
 
-      for (const direction of directions) {
+      for (const direction of DIRECTIONS) {
         const nextX = x + direction.x;
         const nextY = y + direction.y;
         if (!this.isValid(nextX, nextY)) continue;

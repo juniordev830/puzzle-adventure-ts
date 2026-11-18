@@ -6,7 +6,7 @@ Biblioteca TypeScript de lógica para puzzles em grade, não jogo visual final.
 
 ## Localização do código
 
-`src/index.ts`, `src/index.test.ts`, `jest.config.js`, `package.json`.
+`src/index.ts`, `src/index.test.ts`, `package.json`.
 
 ## Verificar localmente
 
