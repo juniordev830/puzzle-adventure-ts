@@ -1,5 +1,7 @@
 # Puzzle Adventure TypeScript
 
+**Navegação** · [Tecnologias](#tecnologias) · [Requisitos](#requisitos) · [Instalação](#instalação) · [Código e estudo](docs/ENGENHARIA_REVERSA.md)
+
 Projeto de estudo de lógica para puzzles em grade, algoritmos de caminho e validação de mapas usando TypeScript. O estado atual é uma biblioteca de lógica e não um jogo visual completo para navegador.
 
 ## Tecnologias
@@ -66,3 +68,9 @@ O `GridBoard` agora permite `clearObstacle(x, y)` para remover uma parede e `rea
 ## Validação e manutenção
 
 Consulte o [guia técnico de validação](docs/GUIA_DE_VALIDACAO.md) antes de alterar o código: ele reúne os comandos, casos de regressão e limites atuais do projeto.
+
+## Código e roteiro de estudo
+
+Como evitar repetir uma posição durante a busca e o que isso muda na complexidade? O [guia de engenharia reversa](docs/ENGENHARIA_REVERSA.md) reúne o mapa dos módulos e uma pergunta técnica baseada no projeto.
+
+Mantido por [João Junior](https://github.com/juniordev830).
